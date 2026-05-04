@@ -1,51 +1,51 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\User;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 
 class AuthController extends Controller
 {
-    public function Register(Request $request)
+    public function showLogin()
     {
-        $validated = $request->validate([
-            'name' => 'required|max:255',
-            'email' => 'required||unique:users',
-            'password' => 'required||min:6||confirmed',
-            'role' => 'required|in:admin,user',
-        ]);
-    
-        $user=User::create($validated);
-        Auth::login($user);
-        return redirect()->route('admin');
+        return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function submitLogin(Request $request)
     {
-        HistoryLogger::log('Login', null, null, 'User login');
-        $credentials = $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-        ]);
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->route('admin');
-        }
-        return Redirect('/')->withErrors([
-            'email' => 'Email atau Password salah.',
-        ])->onlyInput('email');
+        // Tangkap potensi error menggunakan Try-Catch
+        try {
+            // 1. Validasi
+            $credentials = $request->validate([
+                'email' => ['required', 'email'],
+                'password' => ['required'],
+            ]);
 
+            // 2. Cek ke Database
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+                // Jika berhasil, panggil route bernama 'dashboard'
+                return redirect()->route('dashboard'); 
+            }
+
+            // Jika gagal (email/sandi salah)
+            return back()->withErrors([
+                'email' => 'Email dan password salah!',
+            ])->onlyInput('email');
+
+        } catch (\Exception $e) {
+            // JIKA ADA ERROR DATABASE/SISTEM, TAMPILKAN PAKSA DI LAYAR
+            dd("TERJADI ERROR SISTEM/DATABASE:", $e->getMessage());
+        }
     }
 
     public function logout(Request $request)
     {
-        HistoryLogger::log('Logout', null, null, 'User logout');
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
 
+        return redirect('/');
     }
 }

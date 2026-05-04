@@ -1,8 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 
+// Belum Login
+Route::middleware('guest')->group(function () {
+    Route::get('/', [AuthController::class, 'showLogin']);
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'submitLogin'])->name('login.submit');
+});
 
-Route::get('/login', function () {
-    return view('Adminlogin');
-})->name('login');
+// Sesudah Login (Akan masuk ke dashboard)
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/notifikasi', [DashboardController::class, 'notifikasi'])->name('notifikasi');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
