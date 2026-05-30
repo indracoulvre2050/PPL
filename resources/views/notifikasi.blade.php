@@ -11,43 +11,33 @@
 
     <!-- HEADER -->
     <header class="w-full px-6 md:px-12 py-5 flex items-center justify-between bg-[#f4faf2] sticky top-0 z-40 border-b border-transparent transition-all" id="navbar">
-        <div class="text-xl font-extrabold text-[#1e7b2a] tracking-tight flex items-center gap-2">
-            <i class="ph-fill ph-leaf text-2xl"></i> NutriFlow
-        </div>
+        <div class="text-xl font-extrabold text-[#1e7b2a] tracking-tight">NutriFlow</div>
 
         <div class="flex items-center gap-5">
-            <a href="{{ route('notifikasi') }}" class="text-[#1e7b2a] transition relative">
-                <i class="ph-fill ph-bell text-xl"></i>
+            <a href="{{ route('notifikasi') }}" class="text-gray-500 hover:text-[#1e7b2a] transition relative">
+                <i class="ph ph-bell text-xl"></i>
+                <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
             </a>
+
             <button class="text-gray-500 hover:text-gray-800 transition"><i class="ph ph-gear text-xl"></i></button>
-            <!-- Profil & Dropdown -->
+            
             <div class="relative">
-                <!-- Tombol Profil -->
                 <button id="profileDropdownBtn" class="focus:outline-none flex items-center transition-transform active:scale-95">
                     <img src="https://ui-avatars.com/api/?name=Admin&background=1e7b2a&color=fff&bold=true" alt="Profile" class="w-8 h-8 rounded-full border-2 border-[#1e7b2a] shadow-sm cursor-pointer">
                 </button>
 
-                <!-- Menu Dropdown -->
                 <div id="profileDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 py-2 z-50 transform transition-all origin-top-right">
-                    
-                    <!-- Info Singkat Profil (Opsional) -->
                     <div class="px-4 py-3 border-b border-gray-50 mb-1">
                         <p class="text-[13px] font-bold text-gray-800">Admin NutriFlow</p>
                         <p class="text-[10px] text-gray-400 font-medium truncate">admin@gmail.com</p>
                     </div>
-
-                    <!-- Menu Pengaturan -->
-                    <a href="#" class="px-4 py-2 text-[13px] font-semibold text-gray-600 hover:bg-[#f4faf2] hover:text-[#1e7b2a] transition-colors flex items-center gap-2.5">
-                        <i class="ph ph-gear text-[16px]"></i> Pengaturan Akun
-                    </a>
                     
                     <hr class="border-gray-50 my-1">
                     
-                    <!-- Form Logout (Wajib POST) -->
                     <form action="{{ route('logout') }}" method="POST" class="block w-full m-0">
                         @csrf
                         <button type="submit" class="w-full text-left px-4 py-2 text-[13px] font-semibold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2.5">
-                            <i class="ph ph-sign-out text-[16px]"></i> Keluar Sistem
+                            <i class="ph ph-sign-out text-[16px]"></i> Keluar
                         </button>
                     </form>
                 </div>

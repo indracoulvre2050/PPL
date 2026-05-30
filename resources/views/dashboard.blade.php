@@ -14,9 +14,7 @@
 
 <body class="min-h-screen flex flex-col relative overflow-x-hidden bg-[#f4faf2]">
 
-    <!-- ========================================== -->
-    <!-- HEADER / NAVBAR                            -->
-    <!-- ========================================== -->
+    <!-- HEADER / NAVBAR -->
     <header class="w-full px-6 md:px-12 py-5 flex items-center justify-between bg-[#f4faf2] sticky top-0 z-40 border-b border-transparent transition-all" id="navbar">
         <div class="text-xl font-extrabold text-[#1e7b2a] tracking-tight">NutriFlow</div>
 
@@ -38,10 +36,6 @@
                         <p class="text-[13px] font-bold text-gray-800">Admin NutriFlow</p>
                         <p class="text-[10px] text-gray-400 font-medium truncate">admin@gmail.com</p>
                     </div>
-
-                    <a href="#" class="px-4 py-2 text-[13px] font-semibold text-gray-600 hover:bg-[#f4faf2] hover:text-[#1e7b2a] transition-colors flex items-center gap-2.5">
-                        <i class="ph ph-gear text-[16px]"></i> Pengaturan Akun
-                    </a>
                     
                     <hr class="border-gray-50 my-1">
                     
@@ -56,9 +50,7 @@
         </div>
     </header>
 
-    <!-- ========================================== -->
-    <!-- WRAPPER TENGAH (SIDEBAR + KONTEN)          -->
-    <!-- ========================================== -->
+    <!-- WRAPPER TENGAH -->
     <div class="flex flex-grow w-full max-w-[1600px] mx-auto">
         
         <!-- SIDEBAR -->
@@ -73,7 +65,7 @@
             </nav>
         </aside>
 
-        <!-- BODY (KONTEN DASHBOARD) -->
+        <!-- DASHBOARD -->
         <main class="flex-grow pt-8 px-6 md:px-8 pb-10 max-w-5xl">
                 
             <!-- Ringkasan Sistem -->
