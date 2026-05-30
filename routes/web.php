@@ -14,6 +14,8 @@ Route::middleware('guest')->group(function () {
 // Sesudah Login (Akan masuk ke dashboard)
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/sensor', [DashboardController::class, 'sensor'])->name('sensor');
+    Route::post('/sensor/ambang-batas', [DashboardController::class, 'updateAmbangBatas'])->name('sensor.update-batas');
     Route::get('/notifikasi', [DashboardController::class, 'notifikasi'])->name('notifikasi');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

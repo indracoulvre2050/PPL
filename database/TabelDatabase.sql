@@ -30,7 +30,7 @@ Table iot_devices {
 
 Table sensor_types {
   id          bigint      [primary key, increment, not null]
-  name        varchar(50) [not null, unique, note: 'ppm | suhu | ph | cahaya | kelembaban']
+  name        varchar(50) [not null, unique, note: 'ppm | ph']
   unit        varchar(20) [not null]
   description text
 }

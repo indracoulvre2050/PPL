@@ -10,28 +10,57 @@
 <body class="min-h-screen flex flex-col relative overflow-x-hidden">
 
     <!-- HEADER -->
-    <header class="w-full px-6 md:px-12 py-5 flex items-center justify-between bg-white shadow-sm sticky top-0 z-40">
-        <div class="text-xl font-extrabold text-[#1e7b2a] tracking-tight">NutriFlow</div>
-        
-        <nav class="hidden md:flex items-center gap-8 text-[13px] font-bold text-gray-400">
-            <a href="/dashboard" class="hover:text-gray-700 transition-colors">Beranda</a>
-            <a href="#" class="hover:text-gray-700 transition-colors">Tanaman</a>
-            <a href="#" class="hover:text-gray-700 transition-colors">Nutrisi</a>
-            <a href="#" class="hover:text-gray-700 transition-colors">Laporan</a>
-        </nav>
+    <header class="w-full px-6 md:px-12 py-5 flex items-center justify-between bg-[#f4faf2] sticky top-0 z-40 border-b border-transparent transition-all" id="navbar">
+        <div class="text-xl font-extrabold text-[#1e7b2a] tracking-tight flex items-center gap-2">
+            <i class="ph-fill ph-leaf text-2xl"></i> NutriFlow
+        </div>
 
         <div class="flex items-center gap-5">
             <a href="{{ route('notifikasi') }}" class="text-[#1e7b2a] transition relative">
                 <i class="ph-fill ph-bell text-xl"></i>
             </a>
             <button class="text-gray-500 hover:text-gray-800 transition"><i class="ph ph-gear text-xl"></i></button>
-            <img src="https://ui-avatars.com/api/?name=Admin&background=1e7b2a&color=fff&bold=true" alt="Profile" class="w-8 h-8 rounded-full border-2 border-white shadow-sm cursor-pointer">
+            <!-- Profil & Dropdown -->
+            <div class="relative">
+                <!-- Tombol Profil -->
+                <button id="profileDropdownBtn" class="focus:outline-none flex items-center transition-transform active:scale-95">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=1e7b2a&color=fff&bold=true" alt="Profile" class="w-8 h-8 rounded-full border-2 border-[#1e7b2a] shadow-sm cursor-pointer">
+                </button>
+
+                <!-- Menu Dropdown -->
+                <div id="profileDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 py-2 z-50 transform transition-all origin-top-right">
+                    
+                    <!-- Info Singkat Profil (Opsional) -->
+                    <div class="px-4 py-3 border-b border-gray-50 mb-1">
+                        <p class="text-[13px] font-bold text-gray-800">Admin NutriFlow</p>
+                        <p class="text-[10px] text-gray-400 font-medium truncate">admin@gmail.com</p>
+                    </div>
+
+                    <!-- Menu Pengaturan -->
+                    <a href="#" class="px-4 py-2 text-[13px] font-semibold text-gray-600 hover:bg-[#f4faf2] hover:text-[#1e7b2a] transition-colors flex items-center gap-2.5">
+                        <i class="ph ph-gear text-[16px]"></i> Pengaturan Akun
+                    </a>
+                    
+                    <hr class="border-gray-50 my-1">
+                    
+                    <!-- Form Logout (Wajib POST) -->
+                    <form action="{{ route('logout') }}" method="POST" class="block w-full m-0">
+                        @csrf
+                        <button type="submit" class="w-full text-left px-4 py-2 text-[13px] font-semibold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2.5">
+                            <i class="ph ph-sign-out text-[16px]"></i> Keluar Sistem
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </header>
 
     <!-- MAIN KONTEN: DAFTAR NOTIFIKASI -->
-    <main class="flex-grow px-6 md:px-12 pt-8 pb-20 w-full max-w-screen-md mx-auto relative z-10">
+    <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-[#1e7b2a] transition flex items-center gap-1 mb-6">
+        <i class="ph ph-arrow-left text-lg"></i> Kembali ke Dashboard</a>
         
+    <main class="flex-grow px-6 md:px-12 pt-8 pb-20 w-full max-w-screen-md mx-auto relative z-10">
+
         <div class="flex justify-between items-end mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Pusat Notifikasi</h1>
@@ -74,14 +103,32 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="w-full px-6 md:px-12 py-8 bg-[#f4faf2] border-t border-gray-200 mt-auto">
-        <div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="text-[11px] text-gray-500 font-medium text-center md:text-left">
-                <span class="text-lg font-extrabold text-[#1e7b2a] block mb-1">NutriFlow</span>
-                © 2024 NutriFlow Digital Experience. Hak Cipta Dilindungi.
+    <footer class="px-8 py-6 border-t border-gray-200/60 mt-auto text-[12px] text-gray-500 font-medium flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-end gap-6">
+            <div class="text-[11px] text-gray-500 font-medium">
+                © 2026 Kelompok C9 Universitas Jember. Hak Cipta Dilindungi.
             </div>
         </div>
+        <div class="flex items-center gap-1.5"><i class="ph ph-leaf"></i> NutriFlow System</div>
     </footer>
+    
+    <script>    
+        // Logika untuk Dropdown Profil
+        const profileBtn = document.getElementById('profileDropdownBtn');
+        const profileMenu = document.getElementById('profileDropdownMenu');
 
+        // Tampilkan/Sembunyikan menu saat foto diklik
+        profileBtn.addEventListener('click', function(event) {
+            event.stopPropagation(); // Mencegah klik bocor ke background
+            profileMenu.classList.toggle('hidden');
+        });
+
+        // Sembunyikan menu saat mengklik area mana saja di luar menu
+        document.addEventListener('click', function(event) {
+            if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+                profileMenu.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>

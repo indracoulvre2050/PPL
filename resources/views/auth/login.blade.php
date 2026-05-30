@@ -16,20 +16,13 @@
     <img src="{{ asset('assets/Login-kiri.png') }}" alt="Dekorasi Kiri" class="absolute top-0 left-0 w-72 opacity-40 pointer-events-none mix-blend-multiply">
     <img src="{{ asset('assets/Login-kanan.png') }}" alt="Dekorasi Kanan" class="absolute bottom-16 right-0 w-[450px] opacity-40 pointer-events-none mix-blend-multiply">
 
-    <!-- <body class="min-h-screen flex flex-col relative overflow-hidden bg-cover bg-center bg-no-repeat bg-[#f2f8f0]" 
-      style="background-image: url('{{ asset('assets/Login BG.png') }}');">
-       -->
     <!-- Kontainer Form Utama -->
     <div class="flex-grow flex items-center justify-center relative z-10 px-4">
-        <!-- Card Putih -->
         <div class="bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.04)] w-full max-w-[420px] p-8 md:p-10 text-center">
 
             <!-- Bagian Logo NutriFlow -->
-            <div class="flex justify-center mb-3">
-                <div class="bg-[#1e7b2a] text-white p-3 rounded-[1rem] shadow-sm">
-                    <!-- Anda bisa mengganti tag <i> ini dengan tag <img> jika logo Anda berupa file gambar -->
-                    <i class="ph ph-leaf text-3xl"></i> 
-                </div>
+            <div class="flex justify-center">
+                <img src="{{ asset('assets/Logo.png') }}" alt="Logo NutriFlow" class="rounded-[1rem]">
             </div>
             <h1 class="text-2xl font-bold text-[#1e7b2a] mb-8 tracking-tight">NutriFlow</h1>
             

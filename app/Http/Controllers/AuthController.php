@@ -14,7 +14,6 @@ class AuthController extends Controller
 
     public function submitLogin(Request $request)
     {
-        // Tangkap potensi error menggunakan Try-Catch
         try {
             // 1. Validasi
             $credentials = $request->validate([
@@ -25,7 +24,6 @@ class AuthController extends Controller
             // 2. Cek ke Database
             if (Auth::attempt($credentials)) {
                 $request->session()->regenerate();
-                // Jika berhasil, panggil route bernama 'dashboard'
                 return redirect()->route('dashboard'); 
             }
 
@@ -35,7 +33,6 @@ class AuthController extends Controller
             ])->onlyInput('email');
 
         } catch (\Exception $e) {
-            // JIKA ADA ERROR DATABASE/SISTEM, TAMPILKAN PAKSA DI LAYAR
             dd("TERJADI ERROR SISTEM/DATABASE:", $e->getMessage());
         }
     }
