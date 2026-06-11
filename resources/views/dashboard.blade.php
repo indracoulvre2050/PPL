@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - NutriFlow</title>
@@ -69,11 +71,13 @@
         <main class="flex-grow pt-8 px-6 md:px-8 pb-10 max-w-5xl">
                 
             <!-- Ringkasan Sistem -->
-            <div class="mb-6">
-                <h2 class="text-[#1e7b2a] font-bold text-lg">Ringkasan Sistem</h2>
-                <div class="flex items-center gap-2 mt-1.5">
-                    <span class="w-2.5 h-2.5 bg-[#388e3c] rounded-full shadow-[0_0_5px_rgba(56,142,60,0.5)]"></span>
-                    <span class="text-[13px] text-gray-600 font-medium">Sistem Berjalan Normal</span>
+            <div class="{{ $statusSistem['bg_warna'] }} border rounded-2xl p-5 flex items-center gap-4 mb-6 transition-colors duration-500" id="dash-summary-box">
+                <div class="bg-white p-3 rounded-full shadow-sm" id="dash-summary-icon-bg">
+                    <i class="ph-fill {{ $statusSistem['ikon'] }} text-2xl" id="dash-summary-icon"></i>
+                </div>
+                <div>
+                    <p class="text-[12px] font-bold text-gray-600 uppercase tracking-wider mb-1">Status Sistem</p>
+                    <h2 class="text-lg font-bold {{ $statusSistem['teks_warna'] }}" id="dash-summary-text">{{ $statusSistem['teks'] }}</h2>
                 </div>
             </div>
 
@@ -84,10 +88,12 @@
                     <div>
                         <p class="text-[13px] font-bold text-gray-800 mb-4">Kadar Nutrisi</p>
                         <p class="text-3xl font-extrabold text-gray-900 mb-2">
-                            {{ isset($dataNutrisi['tds']) ? number_format($dataNutrisi['tds'], 0, ',', '.') : '1.350' }} <span class="text-sm text-gray-500 font-semibold ml-0.5">PPM</span>
+                            <span id="live-tds-dash">{{ number_format($dataNutrisi['tds'], 0, ',', '.')}}</span>
+                            <span class="text-sm text-gray-500 font-semibold ml-0.5">PPM</span>
                         </p>
-                        <p class="text-[11px] font-bold text-[#388e3c] flex items-center gap-1.5">
-                            <i class="ph ph-arrow-up"></i> Optimal
+                        <p class="text-[12px] font-bold {{ $stabilitas['tds_color'] }} flex items-center gap-1.5 mt-2 transition-colors duration-500">
+                            <i class="ph-fill {{ $stabilitas['tds_icon'] }} text-lg" id="live-tds-icon"></i> 
+                            <span id="live-tds-label">{{ $stabilitas['tds_label'] }}</span>
                         </p>
                     </div>
                     <i class="ph ph-drop text-4xl text-gray-200 opacity-60"></i>
@@ -98,10 +104,12 @@
                     <div>
                         <p class="text-[13px] font-bold text-gray-800 mb-4">Tingkat pH</p>
                         <p class="text-3xl font-extrabold text-gray-900 mb-2">
-                            {{ isset($dataNutrisi['ph']) ? number_format($dataNutrisi['ph'], 1, '.', '') : '6.8' }} <span class="text-sm text-gray-500 font-semibold ml-0.5">pH</span>
+                            <span id="live-ph-dash">{{ number_format($dataNutrisi['ph'], 1, '.', '') }}</span>
+                            <span class="text-sm text-gray-500 font-semibold ml-0.5">pH</span>
                         </p>
-                        <p class="text-[11px] font-bold text-[#388e3c] flex items-center gap-1.5">
-                            <i class="ph ph-check-circle"></i> Stabil
+                        <p class="text-[12px] font-bold {{ $stabilitas['ph_color'] }} flex items-center gap-1.5 mt-2 transition-colors duration-500">
+                            <i class="ph-fill {{ $stabilitas['ph_icon'] }} text-lg" id="live-ph-icon"></i> 
+                            <span id="live-ph-label">{{ $stabilitas['ph_label'] }}</span>
                         </p>
                     </div>
                     <i class="ph ph-drop text-4xl text-gray-200 opacity-60"></i>
@@ -193,6 +201,88 @@
                 profileMenu.classList.add('hidden');
             }
         });
+
+        // Update Data
+        setInterval(function() {
+            fetch('/api/data-terbaru')
+                .then(response => response.json())
+                .then(data => {
+                    let tdsDash = document.getElementById('live-tds-dash');
+                    let phDash = document.getElementById('live-ph-dash');
+                    let sumBox = document.getElementById('dash-summary-box');
+                    let sumText = document.getElementById('dash-summary-text');
+                    let sumIcon = document.getElementById('dash-summary-icon');
+                    let tdsLabel = document.getElementById('live-tds-label');
+                    let tdsIcon = document.getElementById('live-tds-icon');
+                    let phLabel = document.getElementById('live-ph-label');
+                    let phIcon = document.getElementById('live-ph-icon');
+                    
+                    if(tdsDash) tdsDash.innerText = data.tds;
+                    if(phDash) phDash.innerText = data.ph;
+                    if(sumBox && data.statusSistem) {
+                        sumBox.className = `${data.statusSistem.bg_warna} border rounded-2xl p-5 flex items-center gap-4 mb-6 transition-colors duration-500`;
+                        sumText.className = `text-lg font-bold ${data.statusSistem.teks_warna}`;
+                        sumText.innerText = data.statusSistem.teks;
+                        sumIcon.className = `ph-fill ${data.statusSistem.ikon} text-2xl`;
+                    }
+                    if(tdsLabel && data.stabilitas) {
+                        tdsLabel.innerText = data.stabilitas.tds_label;
+                        tdsLabel.parentElement.className = `text-[12px] font-bold ${data.stabilitas.tds_color} flex items-center gap-1.5 mt-2 transition-colors duration-500`;
+                        tdsIcon.className = `ph-fill ${data.stabilitas.tds_icon} text-lg`;
+                    }
+                    if(phLabel && data.stabilitas) {
+                        phLabel.innerText = data.stabilitas.ph_label;
+                        phLabel.parentElement.className = `text-[12px] font-bold ${data.stabilitas.ph_color} flex items-center gap-1.5 mt-2 transition-colors duration-500`;
+                        phIcon.className = `ph-fill ${data.stabilitas.ph_icon} text-lg`;
+                    }
+                })
+                .catch(error => console.error('Gagal mengambil data:', error));
+        }, 3000);
+        
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.register('/sw.js').then(function (registration) {
+                console.log('Service Worker terdaftar.');
+
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === 'granted') {
+                        const vapidPublicKey = "{{ env('VAPID_PUBLIC_KEY') }}";
+                        const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+                        registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: convertedVapidKey
+                        }).then(function (subscription) {
+                            fetch("{{ route('simpan.subscription') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify(subscription)
+                            })
+                            .then(response => response.json())
+                            .then(data => console.log('Sukses tersimpan di DB:', data))
+                            .catch(err => console.error('Gagal mengirim ke DB:', err));
+
+                        });
+                    }
+                });
+            }).catch(function (error) {
+                console.error('Service Worker Error:', error);
+            });
+        }
     </script>
 </body>
 </html>

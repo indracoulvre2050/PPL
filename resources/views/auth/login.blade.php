@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - NutriFlow</title>
     
-    <!-- Menggunakan Tailwind CSS via CDN untuk kemudahan (Bisa diganti dengan Vite bawaan Laravel) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Menggunakan Phosphor Icons untuk Ikon Email dan Password -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+   <script src="https://cdn.tailwindcss.com"></script>
+   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 
 <body class="bg-[#f4faf2] min-h-screen relative font-sans flex flex-col justify-between overflow-hidden">
@@ -35,7 +32,7 @@
             
             <!-- Form Input -->
             <form action="{{ route('login.submit') }}" method="POST" class="text-left space-y-5">
-                @csrf <!-- Token keamanan wajib dari Laravel -->
+                @csrf 
                 
                 <!-- Input Email -->
                 <div>
@@ -85,7 +82,7 @@
     <footer class="relative z-20 w-full px-8 py-6 bg-[#f4faf2] backdrop-blur-md border-t border-gray-200/60 mt-auto">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
             <div class="text-[12px] text-gray-500 font-medium">
-                © 2024 NutriFlow Digital Experience. Pantauan Hidroponik Real-time.
+                © 2026 NutriFlow Digital Experience. Pantauan Hidroponik Real-time.
             </div>
             
             <div class="flex items-center gap-6 text-[12px]">

@@ -1,0 +1,16 @@
+{
+    "name": "NutriFlow Digital Greenhouse",
+    "short_name": "NutriFlow",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#f4faf2",
+    "theme_color": "#1e7b2a",
+    "icons": [
+        {
+            "src": "/assets/Logo.png",
+            "sizes": "80x80",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

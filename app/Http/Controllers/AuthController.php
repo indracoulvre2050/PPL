@@ -15,19 +15,16 @@ class AuthController extends Controller
     public function submitLogin(Request $request)
     {
         try {
-            // 1. Validasi
             $credentials = $request->validate([
                 'email' => ['required', 'email'],
                 'password' => ['required'],
             ]);
 
-            // 2. Cek ke Database
             if (Auth::attempt($credentials)) {
                 $request->session()->regenerate();
                 return redirect()->route('dashboard'); 
             }
 
-            // Jika gagal (email/sandi salah)
             return back()->withErrors([
                 'email' => 'Email dan password salah!',
             ])->onlyInput('email');

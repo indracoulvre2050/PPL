@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        /* Kustomisasi Double Range Slider Identik Desain */
         .slider-container {
             position: relative;
             width: 100%;
@@ -120,8 +119,9 @@
                             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Detail Sensor Nutrisi</h1>
                             <p class="text-[14px] text-gray-600 mt-1">Pemantauan real-time dan pengaturan ambang batas larutan hidroponik.</p>
                         </div>
-                        <div class="bg-[#e4f5e1] text-[#2e7d32] px-4 py-1.5 rounded-full text-[11px] font-extrabold flex items-center gap-2 border border-[#a5d6a7]">
-                            <span class="w-2 h-2 rounded-full bg-[#2e7d32]"></span> SISTEM AKTIF
+                        <div id="status-container" class="{{ $statusAlat['bg'] }} {{ $statusAlat['teks'] }} px-4 py-2 rounded-full flex items-center gap-2 text-[13px] font-bold transition-all duration-500">
+                            <i id="status-icon" class="ph-fill {{ $statusAlat['ikon'] }} text-lg"></i>
+                            <span id="status-text">{{ $statusAlat['label'] }}</span>
                         </div>
                     </div>
 
@@ -143,7 +143,7 @@
                                 <span class="bg-[#b9f6ca] text-[#1b5e20] text-[10px] font-bold px-3 py-1 rounded-md">Normal</span>
                             </div>
                             <div class="flex items-baseline gap-1.5">
-                                <span class="text-5xl font-extrabold text-gray-900 tracking-tighter">{{ number_format($dataNutrisi['ph'], 1, '.', '') }}</span>
+                                <span class="text-5xl font-extrabold text-gray-900 tracking-tighter"> <span id="live-ph-sensor"> {{ number_format($dataNutrisi['ph'], 1, '.', '') }} </span> </span>
                                 <span class="text-sm font-semibold text-gray-500">pH</span>
                             </div>
                         </div>
@@ -163,7 +163,7 @@
                                 <span class="bg-[#b9f6ca] text-[#1b5e20] text-[10px] font-bold px-3 py-1 rounded-md">Normal</span>
                             </div>
                             <div class="flex items-baseline gap-1.5">
-                                <span class="text-5xl font-extrabold text-gray-900 tracking-tighter">{{ number_format($dataNutrisi['tds'], 0, ',', '.') }}</span>
+                                <span class="text-5xl font-extrabold text-gray-900 tracking-tighter"> <span id="live-tds-sensor">{{ number_format($dataNutrisi['tds'], 0, ',', '.') }} </span> </span>
                                 <span class="text-sm font-semibold text-gray-500">PPM</span>
                             </div>
                         </div>
@@ -349,7 +349,7 @@
             }
         });
 
-        <!-- Script Penggerak Double Slider -->
+        // Double Slider
         function setupDualSlider(minId, maxId, trackId, displayMinId, displayMaxId, textMinId, textMaxId, limitMin, limitMax) {
             const minEl = document.getElementById(minId);
             const maxEl = document.getElementById(maxId);
@@ -372,12 +372,12 @@
             }
 
             minEl.addEventListener('input', () => {
-                if (parseFloat(minEl.value) >= parseFloat(maxEl.value)) minEl.value = maxEl.value; // Tahan batas
+                if (parseFloat(minEl.value) >= parseFloat(maxEl.value)) minEl.value = maxEl.value; 
                 updateUI();
             });
             
             maxEl.addEventListener('input', () => {
-                if (parseFloat(maxEl.value) <= parseFloat(minEl.value)) maxEl.value = minEl.value; // Tahan batas
+                if (parseFloat(maxEl.value) <= parseFloat(minEl.value)) maxEl.value = minEl.value;
                 updateUI();
             });
 
@@ -386,6 +386,33 @@
 
         setupDualSlider('ph_min', 'ph_max', 'ph_track', 'ph_display_min', 'ph_display_max', 'ph_text_min', 'ph_text_max', 0, 14);
         setupDualSlider('tds_min', 'tds_max', 'tds_track', 'tds_display_min', 'tds_display_max', 'tds_text_min', 'tds_text_max', 0, 2000);
+
+        // Fetch Data Terbaru
+        setInterval(function() {
+            fetch('/api/data-terbaru')
+                .then(response => response.json())
+                .then(data => {
+                    let tdsSensor = document.getElementById('live-tds-sensor');
+                    let phSensor = document.getElementById('live-ph-sensor');
+                    let statusContainer = document.getElementById('status-container');
+                    let statusIcon = document.getElementById('status-icon');
+                    let statusText = document.getElementById('status-text');
+
+                    if(tdsSensor) tdsSensor.innerText = data.tds;
+                    if(phSensor) phSensor.innerText = data.ph;
+
+                    if(statusContainer && data.status) {
+                        statusContainer.className = `${data.status.bg} ${data.status.teks} px-4 py-2 rounded-full flex items-center gap-2 text-[13px] font-bold transition-all duration-500`;
+                    }
+                    if(statusIcon && data.status) {
+                        statusIcon.className = `ph-fill ${data.status.ikon} text-lg`;
+                    }
+                    if(statusText && data.status) {
+                        statusText.innerText = data.status.label;
+                    }
+                })
+                .catch(error => console.error('Gagal mengambil data:', error));
+        }, 3000);
     </script>
 </body>
 </html>

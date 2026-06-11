@@ -1,0 +1,150 @@
+-- USERS
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    remember_token VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- IOT DEVICES
+CREATE TABLE iot_devices (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    device_name VARCHAR(100) NOT NULL,
+    device_token VARCHAR(255) NOT NULL UNIQUE,
+    mac_address VARCHAR(17) UNIQUE,
+    firmware_version VARCHAR(20),
+    is_online BOOLEAN NOT NULL DEFAULT 0,
+    last_seen_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SENSOR TYPES
+CREATE TABLE sensor_types (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    unit VARCHAR(20) NOT NULL,
+    description TEXT
+);
+
+-- SENSOR READINGS
+CREATE TABLE sensor_readings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    device_id BIGINT NOT NULL,
+    sensor_type_id BIGINT NOT NULL,
+    value DECIMAL(10,4) NOT NULL,
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (device_id, sensor_type_id, recorded_at),
+    INDEX (recorded_at)
+);
+
+-- SENSOR LATEST
+CREATE TABLE sensor_latest (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    device_id BIGINT NOT NULL,
+    sensor_type_id BIGINT NOT NULL,
+    sensor_reading_id BIGINT NOT NULL,
+    value DECIMAL(10,4) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (device_id, sensor_type_id)
+);
+
+<<<<<<< HEAD
+Table sensor_types {
+  id          bigint      [primary key, increment, not null]
+  name        varchar(50) [not null, unique, note: 'ppm | ph']
+  unit        varchar(20) [not null]
+  description text
+}
+=======
+-- THRESHOLDS
+CREATE TABLE thresholds (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    device_id BIGINT NOT NULL,
+    sensor_type_id BIGINT NOT NULL,
+    min_value DECIMAL(10,4) NOT NULL,
+    max_value DECIMAL(10,4) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (device_id, sensor_type_id)
+);
+>>>>>>> 023ac5c246e75c7d4a564eed3187ee4d1e86d0b1
+
+-- ACTUATORS
+CREATE TABLE actuators (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    device_id BIGINT NOT NULL,
+    actuator_code VARCHAR(50) NOT NULL UNIQUE,
+    type VARCHAR(50) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ANOMALY LOGS
+CREATE TABLE anomaly_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sensor_reading_id BIGINT NOT NULL,
+    sensor_type_id BIGINT NOT NULL,
+    device_id BIGINT NOT NULL,
+    value DECIMAL(10,4) NOT NULL,
+    min_value DECIMAL(10,4) NOT NULL,
+    max_value DECIMAL(10,4) NOT NULL,
+    occurred_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (device_id, occurred_at),
+    INDEX (sensor_type_id, occurred_at)
+);
+
+-- ACTUATOR LOGS
+CREATE TABLE actuator_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    actuator_id BIGINT NOT NULL,
+    anomaly_log_id BIGINT NULL,
+    trigger_mode VARCHAR(20) NOT NULL,
+    action VARCHAR(20) NOT NULL,
+    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (actuator_id, executed_at)
+);
+
+-- NOTIFICATIONS
+CREATE TABLE notifications (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    anomaly_log_id BIGINT NULL,
+    actuator_log_id BIGINT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (is_read),
+    INDEX (created_at)
+);
+
+-- FOREIGN KEYS
+ALTER TABLE sensor_readings
+ADD FOREIGN KEY (device_id) REFERENCES iot_devices(id) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD FOREIGN KEY (sensor_type_id) REFERENCES sensor_types(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE sensor_latest
+ADD FOREIGN KEY (device_id) REFERENCES iot_devices(id) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD FOREIGN KEY (sensor_type_id) REFERENCES sensor_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+ADD FOREIGN KEY (sensor_reading_id) REFERENCES sensor_readings(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE thresholds
+ADD FOREIGN KEY (device_id) REFERENCES iot_devices(id) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD FOREIGN KEY (sensor_type_id) REFERENCES sensor_types(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE actuators
+ADD FOREIGN KEY (device_id) REFERENCES iot_devices(id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE anomaly_logs
+ADD FOREIGN KEY (sensor_reading_id) REFERENCES sensor_readings(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+ADD FOREIGN KEY (sensor_type_id) REFERENCES sensor_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+ADD FOREIGN KEY (device_id) REFERENCES iot_devices(id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE actuator_logs
+ADD FOREIGN KEY (actuator_id) REFERENCES actuators(id) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD FOREIGN KEY (anomaly_log_id) REFERENCES anomaly_logs(id) ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE notifications
+ADD FOREIGN KEY (anomaly_log_id) REFERENCES anomaly_logs(id) ON DELETE SET NULL ON UPDATE CASCADE,
+ADD FOREIGN KEY (actuator_log_id) REFERENCES actuator_logs(id) ON DELETE SET NULL ON UPDATE CASCADE;

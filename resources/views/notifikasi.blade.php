@@ -46,7 +46,7 @@
     </header>
 
     <!-- MAIN KONTEN: DAFTAR NOTIFIKASI -->
-    <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-[#1e7b2a] transition flex items-center gap-1 mb-6">
+    <a href="{{ route('dashboard') }}" class="px-4 py-2 max-w-[200px] mx-100px rounded-full flex items-center gap-2 text-[13px] bg-[#1e7b2a] text-white font-bold transition-all duration-500">
         <i class="ph ph-arrow-left text-lg"></i> Kembali ke Dashboard</a>
         
     <main class="flex-grow px-6 md:px-12 pt-8 pb-20 w-full max-w-screen-md mx-auto relative z-10">
@@ -102,18 +102,14 @@
         <div class="flex items-center gap-1.5"><i class="ph ph-leaf"></i> NutriFlow System</div>
     </footer>
     
-    <script>    
-        // Logika untuk Dropdown Profil
+    <script>   
         const profileBtn = document.getElementById('profileDropdownBtn');
         const profileMenu = document.getElementById('profileDropdownMenu');
 
-        // Tampilkan/Sembunyikan menu saat foto diklik
         profileBtn.addEventListener('click', function(event) {
-            event.stopPropagation(); // Mencegah klik bocor ke background
+            event.stopPropagation(); 
             profileMenu.classList.toggle('hidden');
         });
-
-        // Sembunyikan menu saat mengklik area mana saja di luar menu
         document.addEventListener('click', function(event) {
             if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
                 profileMenu.classList.add('hidden');
