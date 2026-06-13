@@ -22,33 +22,36 @@ class DashboardController extends Controller
         try {
             $phDB = DB::table('sensor_latest')
                 ->join('sensor_types', 'sensor_latest.sensor_type_id', '=', 'sensor_types.id')
-                ->where('sensor_types.name', 'ph')
+                ->where('sensor_types.id', 3)
                 ->value('sensor_latest.value');
             if ($phDB !== null) $dataNutrisi['ph'] = $phDB;
 
             $tdsDB = DB::table('sensor_latest')
                 ->join('sensor_types', 'sensor_latest.sensor_type_id', '=', 'sensor_types.id')
-                ->where('sensor_types.name', 'ppm')
+                ->where('sensor_types.id', 1)
                 ->value('sensor_latest.value');
             if ($tdsDB !== null) $dataNutrisi['tds'] = $tdsDB;
         } catch (\Exception $e) {}
 
         // Log Anomali Terakhir
-        $logAnomali = collect();
-        try {
-            $logAnomali = DB::table('anomaly_logs')
-                ->orderBy('occurred_at', 'desc')
-                ->limit(5)
-                ->get();
-        } catch (\Exception $e) {}
+        $logAnomali = DB::table('anomaly_logs')
+            ->join('sensor_types', 'anomaly_logs.sensor_type_id', '=', 'sensor_types.id')
+            ->select('anomaly_logs.*', 'sensor_types.name as nama_sensor')
+            ->orderBy('occurred_at', 'desc')
+            ->limit(5)
+            ->get();
 
-        $notifikasi = collect();
-        try {
-            $notifikasi = DB::table('notifications')
-                ->orderBy('created_at', 'desc')
-                ->limit(3)
-                ->get();
-        } catch (\Exception $e) {}
+        $logAktuator = DB::table('actuator_logs')
+            ->join('actuators', 'actuator_logs.actuator_id', '=', 'actuators.id')
+            ->select('actuator_logs.*', 'actuators.type as nama_alat')
+            ->orderBy('executed_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $notifikasi = DB::table('notifications')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
 
         // Ambang Batas di Database
         $ambangBatasDB = DB::table('ambang_batas')->where('id', 1)->first();
@@ -97,7 +100,7 @@ class DashboardController extends Controller
             }
         }
 
-        return view('dashboard', compact('namaDepan', 'dataNutrisi', 'logAnomali', 'notifikasi', 'stabilitas', 'statusSistem'));
+        return view('dashboard', compact('namaDepan', 'dataNutrisi', 'logAnomali', 'logAktuator', 'notifikasi', 'stabilitas', 'statusSistem'));
     }
             
     // Halaman Notifikasi
@@ -134,13 +137,19 @@ class DashboardController extends Controller
             if ($tdsDB !== null) $dataNutrisi['tds'] = $tdsDB;
         } catch (\Exception $e) {}
 
-        $logAktuator = collect();
-        try {
-            $logAktuator = DB::table('actuator_logs')
-                ->orderBy('executed_at', 'desc')
-                ->limit(4)
-                ->get();
-        } catch (\Exception $e) {}
+        $logAnomali = DB::table('anomaly_logs')
+            ->join('sensor_types', 'anomaly_logs.sensor_type_id', '=', 'sensor_types.id')
+            ->select('anomaly_logs.*', 'sensor_types.name as nama_sensor')
+            ->orderBy('occurred_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $logAktuator = DB::table('actuator_logs')
+            ->join('actuators', 'actuator_logs.actuator_id', '=', 'actuators.id')
+            ->select('actuator_logs.*', 'actuators.type as nama_alat')
+            ->orderBy('executed_at', 'desc')
+            ->limit(5)
+            ->get();
 
         // Ambil data ambang batas
         $ambangBatasDB = DB::table('ambang_batas')->where('id', 1)->first();
@@ -231,10 +240,10 @@ class DashboardController extends Controller
             }
         }
 
-        return view('sensor', compact('namaDepan', 'dataNutrisi', 'logAktuator', 'ambangBatas', 'stabilitas', 'statusAlat'));
+        return view('sensor', compact('namaDepan', 'dataNutrisi', 'logAktuator', 'logAnomali', 'ambangBatas', 'stabilitas', 'statusAlat'));
     }
 
-    // Menympan pengatura
+    // Menympan pengaturan
     public function updateAmbangBatas(Request $request)
     {
         $request->validate([

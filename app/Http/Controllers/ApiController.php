@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use NotificationsChannels\WebPush\WebPushMessage;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -119,5 +122,111 @@ class ApiController extends Controller
         $batas = DB::table('ambang_batas')->where('id', 1)->first();
         
         return response($batas->ph_min . "," . $batas->ph_max . "," . $batas->tds_min);
+    }
+
+    public function kirimSensor(Request $request)
+    {
+
+    $request->validate([
+        'ph' => 'required|numeric',
+        'tds' => 'required|numeric',
+        'relay_mixer' => 'required|integer',   
+        'relay_ph_up' => 'required|integer',
+        'relay_nutrisi' => 'required|integer',
+    ]);
+
+    $ph = $request->ph;
+    $tds = $request->tds;
+    $deviceId = 1;
+
+    // 1. UPDATE SENSOR LATEST
+    DB::table('sensor_latest')->where('sensor_type_id', 3)->update(['value' => $ph, 'updated_at' => now()]);
+    DB::table('sensor_latest')->where('sensor_type_id', 1)->update(['value' => $tds, 'updated_at' => now()]);
+
+    $batas = DB::table('ambang_batas')->orderBy('id', 'desc')->first();
+    $anomalyLogId = null;
+    $pesanNotif = "";
+
+    // 2. CEK & CATAT ANOMALI
+    if ($ph < $batas->ph_min || $ph > $batas->ph_max) {
+        $anomalyLogId = DB::table('anomaly_logs')->insertGetId([
+            'sensor_type_id' => 3,
+            'device_id' => $deviceId,
+            'value' => $ph,
+            'min_value' => $batas->ph_min,
+            'max_value' => $batas->ph_max,
+            'occurred_at' => now()
+        ]);
+        $pesanNotif = "Peringatan! pH air saat ini: " . $ph;
+    } 
+    elseif ($tds < $batas->tds_min || $tds > $batas->tds_max) {
+        $anomalyLogId = DB::table('anomaly_logs')->insertGetId([
+            'sensor_type_id' => 1, 
+            'device_id' => $deviceId,
+            'value' => $tds,
+            'min_value' => $batas->tds_min,
+            'max_value' => $batas->tds_max,
+            'occurred_at' => now()
+        ]);
+        $pesanNotif = "Peringatan! Kadar Nutrisi (PPM) saat ini: " . $tds;
+    }
+
+    // 3. CATAT AKTUATOR
+    $actuatorLogId = null;
+
+    if ($request->relay_nutrisi == 1) {
+        $actuatorLogId = DB::table('actuator_logs')->insertGetId([
+            'actuator_id' => 1, 
+            'anomaly_log_id' => $anomalyLogId,
+            'trigger_mode' => 'Otomatis',
+            'action' => 'Menyala',
+            'executed_at' => now()
+        ]);
+    }
+
+    if ($request->relay_ph_up == 1) {
+        $actuatorLogId = DB::table('actuator_logs')->insertGetId([
+            'actuator_id' => 2, 
+            'anomaly_log_id' => $anomalyLogId,
+            'trigger_mode' => 'Otomatis',
+            'action' => 'Menyala',
+            'executed_at' => now()
+        ]);
+    }
+
+    if ($request->relay_mixer == 1) {
+        $actuatorLogId = DB::table('actuator_logs')->insertGetId([
+            'actuator_id' => 3, 
+            'anomaly_log_id' => $anomalyLogId,
+            'trigger_mode' => 'Otomatis',
+            'action' => 'Menyala',
+            'executed_at' => now()
+        ]);
+    }
+
+    // C. SIMPAN NOTIFIKASI & KIRIM WEB
+    if ($anomalyLogId) {
+        DB::table('notifications')->insert([
+            'anomaly_log_id' => $anomalyLogId,
+            'actuator_log_id' => $actuatorLogId,
+            'message' => $pesanNotif,
+            'is_read' => 0,
+            'created_at' => now()
+        ]);
+
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->notify(new \NotificationChannels\WebPush\WebPushNotification(
+                "Peringatan Sistem",
+                [
+                    'body' => $pesanNotif,
+                    'icon' => '/assets/Logo.png',
+                    'data' => '/dashboard'
+                ]
+            ));
+        }
+    }
+
+    return response()->json(['success' => true, 'message' => 'Data tersimpan di struktur database asli.']);
     }
 }
